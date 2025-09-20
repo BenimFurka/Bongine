@@ -117,7 +117,7 @@ enum class Key(val code: Int) {
 class Input {
     // Текущие состояния
     private val keysPressed = mutableMapOf<Key, Boolean>()
-    private val mouseButtons = BooleanArray(5)
+    val mouseButtons = BooleanArray(5)
 
     // Предыдущие состояния
     private val prevKeysPressed = mutableMapOf<Key, Boolean>()

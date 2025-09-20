@@ -1,6 +1,6 @@
 package org.bon26.engine
 
-class Object(val elementId: Int, var hitbox: Hitbox) {
+class GameObject(val elementId: Int, var hitbox: Hitbox) {
     var tag: String = ""
     var isEnabled: Boolean = true
     var isMarkedForDeletion = false
@@ -36,7 +36,7 @@ class Object(val elementId: Int, var hitbox: Hitbox) {
     }
 
     // Проверяет пересечение с другим GameObject
-    fun intersects(other: Object): Boolean {
+    fun intersects(other: GameObject): Boolean {
         return hitbox.intersects(other.hitbox)
     }
 }
@@ -64,10 +64,10 @@ class RectHitbox(var x: Int, var y: Int, val width: Int, val height: Int) : Hitb
 
 
 class GameObjectManager {
-    val gameObjects = mutableMapOf<Int, Object>()
+    val gameObjects = mutableMapOf<Int, GameObject>()
 
-    fun addGameObject(elementId: Int, hitbox: Hitbox, tag: String = ""): Object {
-        val obj = Object(elementId, hitbox)
+    fun addGameObject(elementId: Int, hitbox: Hitbox, tag: String = ""): GameObject {
+        val obj = GameObject(elementId, hitbox)
         obj.tag = tag
         gameObjects[elementId] = obj
         return obj
@@ -87,19 +87,19 @@ class GameObjectManager {
         gameObjects.remove(elementId)
     }
 
-    fun getGameObject(elementId: Int): Object? {
+    fun getGameObject(elementId: Int): GameObject? {
         return gameObjects[elementId]
     }
 
-    fun getObjectAtPoint(x: Int, y: Int): Object? {
+    fun getObjectAtPoint(x: Int, y: Int): GameObject? {
         return gameObjects.values.firstOrNull { it.isEnabled && it.containsPoint(x, y) }
     }
 
-    fun getObjects(): Map<Int, Object>? {
+    fun getObjects(): Map<Int, GameObject>? {
         return gameObjects
     }
 
-    fun getIntersections(elementId: Int): List<Object> {
+    fun getIntersections(elementId: Int): List<GameObject> {
         val current = gameObjects[elementId] ?: return emptyList()
         return gameObjects.values.filter { it != current && it.isEnabled && current.intersects(it) }
     }

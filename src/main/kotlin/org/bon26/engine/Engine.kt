@@ -6,6 +6,7 @@ class Engine {
     val Audio = AudioEngine()
     val Camera = Camera()
     val Timer = Timer()
+    val SceneManager = SceneManager(this)
     val Particles = ParticleSystem(Graphics)
     private var isRunning = false
     private var lastUpdateTime = System.nanoTime()
@@ -19,21 +20,22 @@ class Engine {
     }
 
     // Методы для работы с объектами и хитбоксами
-    fun createObject(elementId: Int, hitbox: Hitbox, tag: String = ""): Object {
+    fun createObject(elementId: Int, hitbox: Hitbox, tag: String = ""): GameObject {
         return gameObjectManager.addGameObject(elementId, hitbox, tag)
     }
 
-    fun getObjectAtPoint(x: Int, y: Int): Object? {
+    fun getObjectAtPoint(x: Int, y: Int): GameObject? {
         return gameObjectManager.getObjectAtPoint(x, y)
     }
 
-    fun getIntersections(elementId: Int): List<Object> {
+    fun getIntersections(elementId: Int): List<GameObject> {
         return gameObjectManager.getIntersections(elementId)
     }
 
     // Очистка ресурсов
     fun cleanup() {
         Audio.cleanup()
+        SceneManager.cleanup()
     }
 
     fun GameLoop(updateCallback: (Double) -> Unit) {
@@ -42,6 +44,8 @@ class Engine {
             val currentTime = System.nanoTime()
             val deltaTime = (currentTime - lastUpdateTime) / 1_000_000_000.0
             lastUpdateTime = currentTime
+
+            SceneManager.update(deltaTime)
 
             updateCallback(deltaTime)
 

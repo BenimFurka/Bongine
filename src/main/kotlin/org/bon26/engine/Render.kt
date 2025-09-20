@@ -190,6 +190,9 @@ class GraphicsCanvas(width: Int, height: Int) : JPanel() {
     private var nextId = 0
     var clearColor: Color = Color.WHITE
 
+    // Синхронизатор для безопасного доступа к элементам
+    private val elementsLock = Any()
+
     init {
         preferredSize = Dimension(width, height)
     }
@@ -207,8 +210,10 @@ class GraphicsCanvas(width: Int, height: Int) : JPanel() {
             g2d.scale(it.zoom.toDouble(), it.zoom.toDouble())
         }
 
-        // Сортировка элементов по Z-индексу
-        val sortedElements = allElements.values.sortedBy { it.zIndex }
+        // Безопасное копирование и сортировка элементов
+        val sortedElements = synchronized(elementsLock) {
+            allElements.values.toList().sortedBy { it.zIndex }
+        }
 
         // Отрисовка элементов в порядке Z-индекса
         for (element in sortedElements) {
@@ -276,8 +281,10 @@ class GraphicsCanvas(width: Int, height: Int) : JPanel() {
                      color: Color, style: Int, zIndex: Int): Int {
         val id = nextId++
         val element = TextElement(text, x, y, fontName, fontSize, color, style, zIndex, id)
-        textElements[id] = element
-        allElements[id] = element
+        synchronized(elementsLock) {
+            textElements[id] = element
+            allElements[id] = element
+        }
         return id
     }
 
@@ -292,41 +299,50 @@ class GraphicsCanvas(width: Int, height: Int) : JPanel() {
         }
         val id = nextId++
         val element = ImageElement(imagePath, x, y, filter, scaleX, scaleY, rotation, zIndex, id)
-        imageElements[id] = element
-        allElements[id] = element
+        synchronized(elementsLock) {
+            imageElements[id] = element
+            allElements[id] = element
+        }
         return id
     }
+
 
     fun drawRect(x: Int, y: Int, width: Int, height: Int,
                  outlineColor: Color = Color.BLACK, isFilled: Boolean = false,
                  fillColor: Color = outlineColor, strokeWidth: Float = 1f, zIndex: Int): Int {
         val id = nextId++
         val element = RectElement(x, y, width, height, outlineColor, isFilled, fillColor, strokeWidth, zIndex, id)
-        rectElements[id] = element
-        allElements[id] = element
+        synchronized(elementsLock) {
+            rectElements[id] = element
+            allElements[id] = element
+        }
         return id
     }
 
     fun removeElement(id: Int): Boolean {
-        if (!allElements.containsKey(id)) {
-            return false
-        }
+        synchronized(elementsLock) {
+            if (!allElements.containsKey(id)) {
+                return false
+            }
 
-        allElements.remove(id)
-        textElements.remove(id)
-        imageElements.remove(id)
-        rectElements.remove(id)
-        return true
+            allElements.remove(id)
+            textElements.remove(id)
+            imageElements.remove(id)
+            rectElements.remove(id)
+            return true
+        }
     }
 
     fun updateElementPosition(id: Int, x: Int, y: Int): Boolean {
-        val element = allElements[id]
-        if (element != null) {
-            element.x = x
-            element.y = y
-            return true
+        synchronized(elementsLock) {
+            val element = allElements[id]
+            if (element != null) {
+                element.x = x
+                element.y = y
+                return true
+            }
+            return false
         }
-        return false
     }
 
     fun updateElementZIndex(id: Int, zIndex: Int): Boolean {
@@ -428,10 +444,12 @@ class GraphicsCanvas(width: Int, height: Int) : JPanel() {
     }
 
     fun clearAllElements() {
-        allElements.clear()
-        textElements.clear()
-        imageElements.clear()
-        rectElements.clear()
+        synchronized(elementsLock) {
+            allElements.clear()
+            textElements.clear()
+            imageElements.clear()
+            rectElements.clear()
+        }
     }
 
     private fun loadImage(path: String): BufferedImage {
@@ -449,13 +467,13 @@ class Camera {
     var x: Float = 0f
     var y: Float = 0f
     var zoom: Float = 1f
-    var camTarget: Object? = null
+    var camTarget: GameObject? = null
     var cameraSmoothness = 0.0f
     var cameraBounds: RectHitbox? = null
     var isTargetinCenter: Boolean? = null
     var isCameraSmooth: Boolean? = null
 
-    fun setCameraTarget(obj: Object) {
+    fun setCameraTarget(obj: GameObject) {
         camTarget = obj
     }
     fun setCameraBounds(x: Int, y: Int, width: Int, height: Int) {

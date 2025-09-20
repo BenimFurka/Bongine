@@ -5,11 +5,10 @@ import org.bon26.engine.Key
 import org.bon26.engine.MouseButton
 import org.bon26.engine.RectHitbox
 import java.awt.Color
-import java.awt.event.KeyEvent
 
 fun main() {
     val engine = Engine()
-    engine.initialize(800, 600, "Particles Test and really big name wtf lol huh is it have limit or not blah blah blahaj Россия - священная наша держава, Россия - любимая наша страна. Могучая воля, великая слава - Твое достоянье на все времена!")
+    engine.initialize(800, 600, "Particles Test and really big name wtf lol huh is it have limit or not blah blah blahaj")
 
 
     val playerHitbox = RectHitbox(0, 0, 1, 1)
@@ -37,9 +36,9 @@ fun main() {
         engine.Particles.emit(
             x = x,
             y = y,
-            count = 10,
+            count = 30,
             minSize = 4,
-            maxSize = 50,
+            maxSize = 25,
             minLifetime = 0.8,
             maxLifetime = 2.5,
             minVelocityX = 800f,
@@ -63,7 +62,5 @@ fun main() {
 
         engine.gameObjectManager.updateHitboxPosition(1, engine.Input.mouseX, engine.Input.mouseY)
         engine.Graphics.updateElementPosition(playerGraphicId, engine.Input.mouseX, engine.Input.mouseY)
-
-        println("${engine.Input.getMouseButtonHoldTime(MouseButton.LEFT)}")
     }
 }
