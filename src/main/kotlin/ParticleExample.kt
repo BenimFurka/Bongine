@@ -8,7 +8,7 @@ import java.awt.Color
 
 fun main() {
     val engine = Engine()
-    engine.initialize(800, 600, "Particles Test and really big name wtf lol huh is it have limit or not blah blah blahaj")
+    engine.initialize(800, 600, "Particles Test and really big name wtf lol huh is it have limit or not blah blah blahaj Россия - священная наша держава, Россия - любимая наша страна. Могучая воля, великая слава - Твое достоянье на все времена!")
 
 
     val playerHitbox = RectHitbox(0, 0, 1, 1)
